@@ -101,7 +101,7 @@ const watch = (p) => { p.on("pageerror", (e) => errors.push(e.message)); p.on("c
   check("desktop hero uses 3D", (await p.getAttribute("[data-hero-mode]", "data-hero-mode")) === "3d");
   check("canvas mounted", (await p.locator("canvas").count()) === 1);
   await p.evaluate(() => window.scrollTo(0, window.innerHeight * 1.6));
-  await p.waitForTimeout(3500);
+  await p.waitForTimeout(9000);
   check("side-view services layer visible after scroll", await p.getByText("Üks platvorm. Neli lahendust.").isVisible());
   await p.screenshot({ path: `${out}/hero-side.png` });
   await p.evaluate(() => window.scrollTo(0, document.body.scrollHeight));

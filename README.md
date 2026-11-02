@@ -75,10 +75,11 @@ Design tokens (colours, fonts, utilities such as `display`, `label`, `brushed` a
 
 - The heavy 3D code is loaded with `next/dynamic` (`ssr: false`), so text and buttons are server-rendered and usable straight away.
 - **Static fallback:** `public/images/hero-desktop.jpg` and `hero-mobile.jpg` are stills rendered from the same scene. They appear immediately, and they stay in place when WebGL is unavailable, when the visitor prefers reduced motion, on low-power devices (fewer than 4 CPU cores, under 3 GB device memory, or Save-Data turned on), or when `?static` is added to the URL.
-- **Desktop** (≥1024 px with a fine pointer) gets a 260 vh pinned section, the scroll camera move, pointer parallax, soft shadows, a reflective road, bloom and a vignette.
+- **Intro:** on load, the camera starts low at the grille and pulls back into the hero shot. The headlights flicker on and then the roof beacons start. Add `?nointro` to the URL to skip it, which is useful for screenshots.
+- **Desktop** (≥1024 px with a fine pointer) gets a 260 vh pinned section and the scroll camera move, which cranes up and round to the side view. It also gets pointer parallax, soft shadows, a wet reflective road, headlight beams in haze with drifting dust, bloom and a vignette.
 - **Mobile and tablet** get their own front-on composition, with no pinning, shadows, reflections or post-processing, and resolution capped at 1.5×.
 - Rendering pauses when the hero is off screen or the tab is hidden. `PerformanceMonitor` lowers the quality automatically when the frame rate drops.
-- **Regenerating the stills and OG image** after changing the scene: run the site, then `node scripts/render-stills.mjs http://localhost:3000` (needs Playwright).
+- **Regenerating the stills and OG image** after changing the scene: run the site, then `node scripts/render-stills.mjs http://localhost:3000` (needs Playwright; set `WAIT=20000` or more when rendering without a GPU).
 
 ### Replacing the procedural model with a GLB
 

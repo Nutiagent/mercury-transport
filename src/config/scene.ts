@@ -22,7 +22,14 @@ export const sceneConfig = {
 
 /** Mutable state shared between GSAP (DOM) and the render loop. Never triggers React renders. */
 export const heroState = {
+  /** scroll progress through the pinned hero, 0 → 1 */
   progress: 0,
   pointerX: 0,
   pointerY: 0,
+  /** intro sequence, driven by the render loop: 0 → 1 */
+  intro: 0,
+  /** headlights / tail lights, 0 → 1 */
+  lights: 0,
+  /** roof beacons on/off, 0 | 1 */
+  beacons: 0,
 };

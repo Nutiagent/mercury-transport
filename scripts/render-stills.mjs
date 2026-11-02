@@ -9,11 +9,11 @@ const browser = await chromium.launch({ args: ["--use-gl=angle", "--use-angle=sw
 
 async function still(out, width, height, dpr) {
   const page = await browser.newPage({ viewport: { width, height }, deviceScaleFactor: dpr });
-  await page.goto(base + "/", { waitUntil: "networkidle", timeout: 120000 });
+  await page.goto(base + "/?nointro", { waitUntil: "networkidle", timeout: 120000 });
   await page.addStyleTag({ content: "[data-overlay],header,nextjs-portal{visibility:hidden!important} picture{display:none!important}" });
   await page.waitForFunction(() => document.querySelector("canvas"), null, { timeout: 60000 });
-  await page.waitForTimeout(9000);
-  await page.screenshot({ path: out, type: "jpeg", quality: 84 });
+  await page.waitForTimeout(+(process.env.WAIT || 20000));
+  await page.screenshot({ path: out, type: "jpeg", quality: 84, timeout: 240000 });
   await page.close();
   console.log("wrote", out);
 }
@@ -29,6 +29,6 @@ await og.addStyleTag({
     "header nav, header [aria-controls], nextjs-portal, [data-hero-mode] .label, [data-hero-mode] p:not(.label), [data-hero-mode] a {display:none!important} [data-hero-mode] h1{font-size:78px!important}",
 });
 await og.waitForTimeout(2500);
-await og.screenshot({ path: "public/og.jpg", type: "jpeg", quality: 86 });
+await og.screenshot({ path: "public/og.jpg", type: "jpeg", quality: 86, timeout: 120000 });
 console.log("wrote public/og.jpg");
 await browser.close();

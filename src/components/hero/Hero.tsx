@@ -14,7 +14,7 @@ const Scene = dynamic(() => import("../three/Scene"), { ssr: false });
 
 type Mode = "pending" | "3d" | "static";
 
-function detect(): { mode: Mode; profile: SceneProfile; pinned: boolean } {
+function detect(): { mode: Mode; profile: SceneProfile; pinned: boolean; intro: boolean } {
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const desktop = window.matchMedia("(min-width: 1024px) and (pointer: fine)").matches || window.matchMedia("(min-width: 1180px)").matches;
   const nav = navigator as Navigator & { deviceMemory?: number; connection?: { saveData?: boolean } };
@@ -32,17 +32,18 @@ function detect(): { mode: Mode; profile: SceneProfile; pinned: boolean } {
   const forceStatic = new URLSearchParams(window.location.search).has("static");
   const mode: Mode = !webgl || reduced || weak || forceStatic ? "static" : "3d";
   const profile: SceneProfile = desktop ? "desktop" : "mobile";
-  return { mode, profile, pinned: mode === "3d" && profile === "desktop" };
+  return { mode, profile, pinned: mode === "3d" && profile === "desktop", intro: !new URLSearchParams(window.location.search).has("nointro") };
 }
 
 export function Hero() {
   const root = useRef<HTMLElement>(null);
   const copyRef = useRef<HTMLDivElement>(null);
   const servicesRef = useRef<HTMLDivElement>(null);
-  const [state, setState] = useState<{ mode: Mode; profile: SceneProfile; pinned: boolean }>({
+  const [state, setState] = useState<{ mode: Mode; profile: SceneProfile; pinned: boolean; intro: boolean }>({
     mode: "pending",
     profile: "desktop",
     pinned: false,
+    intro: true,
   });
   const [ready, setReady] = useState(false);
   const [active, setActive] = useState(true);
@@ -152,7 +153,7 @@ export function Hero() {
 
         {show3d && (
           <div className={`absolute inset-0 transition-opacity duration-1000 ${ready ? "opacity-100" : "opacity-0"}`}>
-            <Scene profile={state.profile} active={active} animate onReady={() => setReady(true)} />
+            <Scene profile={state.profile} active={active} animate intro={state.intro} onReady={() => setReady(true)} />
           </div>
         )}
 

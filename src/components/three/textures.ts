@@ -164,3 +164,63 @@ export function makeDoorDecal(phone: string) {
   t.anisotropy = 8;
   return t;
 }
+
+/** Diamond checker plate, used as bump + roughness for the deck. */
+export function makeCheckerPlate() {
+  const [c, ctx] = canvas(128, 128);
+  ctx.fillStyle = "#7a7a7a";
+  ctx.fillRect(0, 0, 128, 128);
+  const lug = (x: number, y: number, rot: number) => {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(rot);
+    const g = ctx.createLinearGradient(-18, 0, 18, 0);
+    g.addColorStop(0, "#9a9a9a");
+    g.addColorStop(0.5, "#ffffff");
+    g.addColorStop(1, "#9a9a9a");
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 20, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  };
+  lug(32, 32, Math.PI / 4);
+  lug(96, 96, Math.PI / 4);
+  lug(96, 32, -Math.PI / 4);
+  lug(32, 96, -Math.PI / 4);
+  const t = new THREE.CanvasTexture(c);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.anisotropy = 8;
+  return t;
+}
+
+/** Directional truck-tyre tread (u = around the tyre, v = across). */
+export function makeTreadTexture() {
+  const [c, ctx] = canvas(2048, 128);
+  ctx.fillStyle = "#202020";
+  ctx.fillRect(0, 0, 2048, 128);
+  ctx.fillStyle = "#e0e0e0";
+  const n = 48;
+  const w = 2048 / n;
+  for (let i = 0; i < n; i++) {
+    const x = i * w;
+    // two staggered blocks across the tread with a centre groove
+    ctx.beginPath();
+    ctx.moveTo(x + 2, 6);
+    ctx.lineTo(x + w * 0.62, 6);
+    ctx.lineTo(x + w * 0.8, 58);
+    ctx.lineTo(x + w * 0.2, 58);
+    ctx.closePath();
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(x + w * 0.2 + w / 2, 70);
+    ctx.lineTo(x + w * 0.8 + w / 2, 70);
+    ctx.lineTo(x + w * 0.62 + w / 2, 122);
+    ctx.lineTo(x + 2 + w / 2, 122);
+    ctx.closePath();
+    ctx.fill();
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.wrapS = THREE.RepeatWrapping;
+  return t;
+}

@@ -10,8 +10,8 @@ page.on("console", (m) => { if (["error", "warning"].includes(m.type())) logs.pu
 page.on("pageerror", (e) => logs.push(`pageerror: ${e.message}`));
 await page.goto(url, { waitUntil: "networkidle", timeout: 120000 });
 if (process.env.HIDE) await page.addStyleTag({ content: "[data-overlay],header{visibility:hidden!important}" });
-await page.waitForTimeout(6000);
+await page.waitForTimeout(+(process.env.WAIT || 6000));
 if (+scrollY) { await page.evaluate((y) => window.scrollTo(0, y), +scrollY); await page.waitForTimeout(3500); }
-await page.screenshot({ path: out, fullPage: full === "1" });
+await page.screenshot({ path: out, fullPage: full === "1", timeout: 120000 });
 console.log(logs.join("\n") || "no console errors");
 await browser.close();
