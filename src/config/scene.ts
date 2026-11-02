@@ -7,6 +7,8 @@
  * `modelTransform` so the model's front faces +X and its wheels rest on y = 0.
  */
 export const sceneConfig = {
+  /** "film" (default) uses the supplied brand film; "3d" uses the real-time truck scene. */
+  heroMode: (process.env.NEXT_PUBLIC_HERO_MODE === "3d" ? "3d" : "film") as "film" | "3d",
   modelUrl: process.env.NEXT_PUBLIC_HERO_MODEL_URL || "",
   modelTransform: {
     position: [0, 0, 0] as [number, number, number],

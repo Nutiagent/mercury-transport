@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { Hero } from "@/components/hero/Hero";
+import Image from "next/image";
+import { HomeHero } from "@/components/HomeHero";
+import { FilmChapters } from "@/components/film/FilmChapters";
 import { ServiceSelector } from "@/components/ServiceSelector";
-import { Process } from "@/components/Process";
 import { Faq } from "@/components/Faq";
 import { CtaBand } from "@/components/CtaBand";
 import { SectionLabel } from "@/components/SectionLabel";
@@ -10,12 +11,35 @@ import { Arrow } from "@/components/Button";
 import { JsonLd } from "@/components/JsonLd";
 import { generalFaqs } from "@/content/general";
 import { site } from "@/config/site";
+import { sceneById } from "@/content/media";
 import { faqJsonLd } from "@/lib/structured-data";
 
 export default function HomePage() {
   return (
     <>
-      <Hero />
+      <HomeHero />
+
+      {/* Statement */}
+      <section aria-label="Mercury lühidalt" className="relative border-b border-line bg-ink py-20 md:py-28">
+        <div className="wrap grid gap-12 lg:grid-cols-12">
+          <p className="display text-[clamp(2rem,5.2vw,4.6rem)] leading-[0.98] text-pretty lg:col-span-10">
+            Kui tee saab otsa, <span className="text-steel-2">algab meie töö.</span> Öösel, vihmas ja lumes, üle kogu Eesti.
+          </p>
+          <dl className="grid grid-cols-2 gap-px border border-line bg-line lg:grid-cols-4 lg:col-span-12">
+            {[
+              ["Valves", "24/7"],
+              ["Piirkond", "Kogu Eesti"],
+              ["Teel alates", String(site.foundedYear)],
+              ["Vedu", "Kindlustatud"],
+            ].map(([k, v]) => (
+              <div key={k} className="bg-ink p-5 sm:p-6">
+                <dt className="label text-steel">{k}</dt>
+                <dd className="display mt-3 text-[clamp(1.2rem,5.2vw,1.4rem)] sm:text-[1.75rem] lg:text-[clamp(1.5rem,2.2vw,2.1rem)]">{v}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </section>
 
       {/* Service overview + selector */}
       <section id="teenused" aria-labelledby="services-title" className="relative bg-ink py-24 md:py-32">
@@ -64,11 +88,11 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Process */}
-      <section aria-labelledby="process-title" className="brushed relative border-y border-line py-24 md:py-32">
+      {/* Process told as film chapters */}
+      <section aria-labelledby="process-title" className="relative border-y border-line bg-carbon py-24 md:py-32">
         <div className="wrap">
           <div className="grid gap-6 md:grid-cols-12">
-            <div className="md:col-span-5">
+            <div className="md:col-span-6">
               <SectionLabel index="02">Kuidas vedu käib</SectionLabel>
               <h2 id="process-title" className="display mt-6 text-[clamp(2.4rem,5.4vw,4.4rem)]">
                 Neli sammu kõnest sihtkohani.
@@ -79,48 +103,57 @@ export default function HomePage() {
             </p>
           </div>
           <div className="mt-16 md:mt-24">
-            <Process />
+            <FilmChapters />
           </div>
         </div>
       </section>
 
-      {/* Company introduction — editorial */}
-      <section aria-labelledby="about-title" className="relative overflow-hidden bg-ink py-24 md:py-36">
-        <div className="wrap grid gap-14 lg:grid-cols-12">
-          <div className="lg:col-span-5">
-            <SectionLabel index="03">Ettevõttest</SectionLabel>
-            <p aria-hidden className="display-condensed mt-10 text-[clamp(7rem,24vw,15rem)] leading-[0.8] text-bone">
-              {site.foundedYear}
-            </p>
-            <p className="label mt-4 text-steel">Asutatud · Tallinn</p>
-          </div>
-          <div className="lg:col-span-6 lg:col-start-7 lg:pt-24">
-            <h2 id="about-title" className="display text-[clamp(2rem,4.2vw,3.4rem)]">
-              Teel alates {site.foundedYear}. aastast.
-            </h2>
-            <div className="mt-8 space-y-5 text-lg leading-relaxed text-bone-dim text-pretty">
-              <p>
-                Mercury Transport on Tallinnas tegutsev puksiirabi- ja veoettevõte. Aitame inimesi ja ettevõtteid, kelle
-                sõiduk on jäänud teele seisma, ning veame autosid, ehitustehnikat ja muid veoseid üle kogu Eesti.
-              </p>
-              <p>Kõik veetavad sõidukid ja ehitustehnika on kaetud veoseveo vastutuskindlustusega.</p>
+      {/* Company introduction — full-bleed editorial image */}
+      <section aria-labelledby="about-title" className="relative isolate overflow-hidden bg-ink">
+        <div className="relative h-[70svh] min-h-[480px] w-full md:h-[88svh]">
+          <Image
+            src={sceneById("road").still}
+            alt={sceneById("road").alt}
+            fill
+            sizes="100vw"
+            className="object-cover"
+          />
+          <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-ink via-ink/20 to-ink/40" />
+          <div className="absolute inset-x-0 bottom-0">
+            <div className="wrap pb-12 md:pb-20">
+              <SectionLabel index="03" className="text-bone/80">
+                Ettevõttest
+              </SectionLabel>
+              <h2 id="about-title" className="display mt-6 max-w-[14ch] text-[clamp(2.6rem,7vw,6.4rem)]">
+                Teel alates {site.foundedYear}. aastast.
+              </h2>
             </div>
-            <dl className="mt-12 grid grid-cols-2 gap-px border border-line bg-line">
+          </div>
+        </div>
+        <div className="wrap grid gap-12 pb-24 pt-4 md:pb-32 lg:grid-cols-12">
+          <div className="space-y-5 text-lg leading-relaxed text-bone-dim text-pretty lg:col-span-6">
+            <p>
+              Mercury Transport on Tallinnas tegutsev puksiirabi- ja veoettevõte. Aitame inimesi ja ettevõtteid, kelle sõiduk
+              on jäänud teele seisma, ning veame autosid, ehitustehnikat ja muid veoseid üle kogu Eesti.
+            </p>
+            <p>Kõik veetavad sõidukid ja ehitustehnika on kaetud veoseveo vastutuskindlustusega.</p>
+          </div>
+          <div className="lg:col-span-5 lg:col-start-8">
+            <dl className="divide-y divide-line border-y border-line">
               {[
-                ["Saadavus", "24/7"],
-                ["Piirkond", "Kogu Eesti"],
+                ["Ärinimi", site.legalName],
                 ["Registrikood", site.registryCode],
-                ["Vedu", "Kindlustatud"],
+                ["Asukoht", "Tallinn, Eesti"],
               ].map(([k, v]) => (
-                <div key={k} className="bg-ink p-5 sm:p-6">
-                  <dt className="label text-steel">{k}</dt>
-                  <dd className="display mt-3 text-[clamp(1.25rem,2.6vw,1.9rem)]">{v}</dd>
+                <div key={k} className="flex justify-between gap-6 py-4">
+                  <dt className="label pt-1 text-steel">{k}</dt>
+                  <dd className="text-right font-mono text-sm">{v}</dd>
                 </div>
               ))}
             </dl>
             <Link
               href="/ettevottest"
-              className="group/btn mt-10 inline-flex min-h-12 items-center gap-2 font-semibold underline decoration-line underline-offset-8 hover:decoration-signal"
+              className="group/btn mt-8 inline-flex min-h-12 items-center gap-2 font-semibold underline decoration-line underline-offset-8 hover:decoration-signal"
             >
               Loe ettevõttest <Arrow />
             </Link>
@@ -146,7 +179,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <CtaBand />
+      <CtaBand image={sceneById("arrival").still} />
       <JsonLd data={faqJsonLd(generalFaqs)} />
     </>
   );

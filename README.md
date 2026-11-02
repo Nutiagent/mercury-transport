@@ -1,7 +1,7 @@
 # Mercury Transport veebileht
 
 A custom website for **Mercury Transport** (MERCURY TRANSPORTATIONS OÜ, reg. 14063837). All customer-facing copy is in Estonian.
-The hero is a real-time 3D scene of a flatbed recovery truck carrying a compact excavator. Scrolling moves the camera from a front three-quarter shot to a side view that introduces the services.
+The site is built around the company's 10-second brand film. It plays full-bleed in the hero. Its four scenes (arrival, recovery, loading, on the road) then return as slow-motion chapters that tell the "how a tow works" story, and as stills in every page header. An earlier real-time 3D hero is still in the code and can be switched on with `NEXT_PUBLIC_HERO_MODE=3d`.
 
 **Stack:** Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS 4 · React Three Fiber 9 + Drei 10 · @react-three/postprocessing · GSAP 3 + ScrollTrigger · Zod 4
 
@@ -35,6 +35,7 @@ See `.env.example`. Only `NEXT_PUBLIC_*` values reach the browser. Everything el
 | `QUOTE_FROM_EMAIL` | for the form | Sender on a domain verified in Resend, e.g. `Mercury veebileht <paring@domain.ee>`. |
 | `FORM_SECRET` | yes, in production | Long random string that signs the anti-spam form tokens. Without it, each server instance makes its own secret, and tokens fail across instances. |
 | `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` | no | Turns on cookieless Plausible analytics. Leave it empty to keep tracking off (the default). |
+| `NEXT_PUBLIC_HERO_MODE` | no | `film` (default) or `3d` to use the real-time 3D hero instead of the film. |
 | `NEXT_PUBLIC_HERO_MODEL_URL` | no | Path to a licensed GLB that replaces the procedural truck (see below). |
 | `RESEND_API_URL` | no | Overrides the Resend endpoint. Only for testing against a mock server. |
 
@@ -56,11 +57,14 @@ Rate limiting is in memory, per server instance: 5 enquiries per IP every 15 min
 ```
 src/
   config/site.ts          ← all business facts (single source of truth)
-  config/scene.ts         ← 3D model swap + shared scroll/pointer state
+  config/scene.ts         ← hero mode, 3D model swap + shared scroll/pointer state
+  content/media.ts        ← film files, scene timings, stills, alt texts, service → scene mapping
   content/services.ts     ← service copy, FAQs, practical info, form field rules
   content/general.ts      ← process steps, general FAQ
   app/                    ← routes: /, /teenused, /teenused/[slug], /ettevottest, /kontakt, /privaatsus, 404, api/quote, sitemap, robots
-  components/hero/Hero.tsx        ← capability detection, GSAP scroll timeline, static fallback
+  components/film/FilmHero.tsx    ← full-bleed film hero, scene index, pause control
+  components/film/FilmChapters.tsx ← process told as four film chapters (sticky frame on desktop)
+  components/hero/Hero.tsx        ← (optional 3D hero) capability detection, GSAP scroll timeline, static fallback
   components/three/Scene.tsx      ← canvas, camera choreography, lights, road, wordmark, post-processing
   components/three/Truck.tsx      ← procedural truck + excavator
   components/quote/QuoteForm.tsx  ← enquiry form
@@ -71,7 +75,33 @@ scripts/                  ← render-stills, screenshot audit, e2e checks (dev t
 
 Design tokens (colours, fonts, utilities such as `display`, `label`, `brushed` and `hazard`) live in `src/app/globals.css` under `@theme`.
 
-## 3D hero
+## Film hero
+
+- Files live in `public/media/`. They are H.264 MP4 with no audio track and `faststart`, so playback starts before the download finishes.
+  - `film-1080.mp4` (4.4 MB) is for large or high-DPI screens. `film-720.mp4` (1.4 MB) is for the rest. `film-mobile.mp4` (1 MB) is a 4:5 crop for phones in portrait.
+  - `scene-*.mp4` are the four scenes slowed to 1.6× for the chapters (0.3 to 0.7 MB each).
+  - `*.jpg` are stills from the film, used as posters and page headers.
+- The poster is a normal image under the video, so the headline and buttons never wait for the video.
+- The video is muted and plays inline. It pauses when scrolled off screen, and it has a visible pause and play button (WCAG 2.2.2).
+- When the visitor prefers reduced motion, or Save-Data is on, nothing autoplays. The visitor sees the still and can press play.
+- Chapter clips load lazily, and only the clip on screen plays.
+- Scene timings, labels and alt texts are in `src/content/media.ts`.
+
+**Re-encoding from a new master** (needs ffmpeg):
+
+```bash
+SRC=master.mp4
+ffmpeg -i $SRC -an -vf scale=1920:-2 -c:v libx264 -preset slow -crf 23 -pix_fmt yuv420p -movflags +faststart public/media/film-1080.mp4
+ffmpeg -i $SRC -an -vf scale=1280:-2 -c:v libx264 -preset slow -crf 25 -pix_fmt yuv420p -movflags +faststart public/media/film-720.mp4
+ffmpeg -i $SRC -an -vf "crop=864:1080:528:0,scale=720:-2" -c:v libx264 -preset slow -crf 25 -pix_fmt yuv420p -movflags +faststart public/media/film-mobile.mp4
+# one scene, e.g. loading (start 2.875 s, ~2.9 s long), slowed down
+ffmpeg -ss 2.875 -t 2.9 -i $SRC -an -vf "setpts=1.6*PTS,scale=1280:-2" -r 24 -c:v libx264 -preset slow -crf 26 -pix_fmt yuv420p -movflags +faststart public/media/scene-loading.mp4
+ffmpeg -ss 3.5 -i $SRC -frames:v 1 -q:v 3 public/media/loading.jpg
+```
+
+The mobile crop assumes a 1920×1080 master. Adjust the `crop` values for other sizes.
+
+## 3D hero (optional, `NEXT_PUBLIC_HERO_MODE=3d`)
 
 - The heavy 3D code is loaded with `next/dynamic` (`ssr: false`), so text and buttons are server-rendered and usable straight away.
 - **Static fallback:** `public/images/hero-desktop.jpg` and `hero-mobile.jpg` are stills rendered from the same scene. They appear immediately, and they stay in place when WebGL is unavailable, when the visitor prefers reduced motion, on low-power devices (fewer than 4 CPU cores, under 3 GB device memory, or Save-Data turned on), or when `?static` is added to the URL.
@@ -92,14 +122,16 @@ Design tokens (colours, fonts, utilities such as `display`, `label`, `brushed` a
 
 | Asset | Source | Licence |
 | --- | --- | --- |
+| Brand film and every file in `public/media/` | Supplied by the owner. The file name suggests it was generated with Higgsfield AI. | **Owner must confirm the usage rights** (see below) |
+| `og.jpg` | Screenshot of the film hero | Same as the film |
 | 3D truck, excavator, road and wordmark textures | Built procedurally in code for this project | Owned by the project |
-| Hero stills and `og.jpg` | Rendered from the scene above | Owned by the project |
+| 3D hero stills (`public/images/`) | Rendered from the 3D scene | Owned by the project |
 | Service drawings (`ServiceGlyph`) | Hand-made SVG for this project | Owned by the project |
 | Archivo (variable) | Google Fonts via `@fontsource-variable/archivo` | SIL Open Font License 1.1 |
 | JetBrains Mono (variable) | `@fontsource-variable/jetbrains-mono` | SIL Open Font License 1.1 |
 | three.js, R3F, Drei, GSAP, Next.js and the rest | npm | MIT. GSAP uses the free "Standard" licence, which allows commercial use. |
 
-The site uses no stock photos or third-party images. The old site's photos could not be retrieved, so there is no real photography yet (see below).
+The site uses no stock photos. All imagery comes from the owner's film.
 
 ## Verified information and sources
 
@@ -124,14 +156,16 @@ The site publishes no testimonials, statistics, certifications, partner logos or
 7. **Photography:** real photos of the trucks and jobs, which can go on service pages and the about page.
 8. **Privacy page (`/privaatsus`):** a lawyer or the owner should review it. In particular: the retention period, the hosting provider's name and location, Resend as a processor (US-based, transfer basis), and whether the owner wants a named contact person.
 9. **Production domain** for `NEXT_PUBLIC_SITE_URL`.
+10. **Brand film rights:** confirm that the company may use the film commercially on the web (check the generator's plan or licence terms if it is AI-generated).
+11. **Film content vs. real fleet:** the film shows generic vehicles. If it is AI-generated, it does not show the company's actual trucks. Confirm the owner is happy for it to stand in for the fleet, or replace it with real footage later (re-encode commands above).
 
 ## Checks run
 
-These ran on 2 Nov 2026 against the production build (`next build && next start`):
+These ran on 2 Nov 2026 (after the film redesign) against the production build (`next build && next start`):
 
 - `npm run build`: passed. 13 routes, all static except `/api/quote`.
 - `npm run typecheck` and `npm run lint`: passed with no errors or warnings.
 - Screenshots of every route at 390, 768 and 1440 px: no horizontal overflow, and no console errors apart from the expected 404 on the missing-page test.
-- `scripts/e2e.mjs`: form preselection, validation, focus handling, success (mock e-mail provider), provider failure, not-configured message with fallback, mobile menu (open, Escape, navigation), all internal links, service selector keyboard control, 3D mode and scroll to the side view, reduced motion and no-WebGL fallbacks.
+- `scripts/e2e.mjs` (34 checks, all passing): form preselection, validation, focus handling, success (mock e-mail provider), provider failure, not-configured message with fallback, mobile menu (open, Escape, navigation), all internal links, service selector keyboard control, film autoplay, pause and play, pausing off screen, chapters switching on scroll with only one clip playing, reduced motion (nothing autoplays, poster shown), portrait film on mobile.
 - API checks with curl: too-fast token, invalid token, honeypot, validation errors (422), success (200), provider failure (502), rate limit (429), not configured (503).
-- Not checked: real Resend delivery (no credentials) and performance on real phones (WebGL was software-rendered in headless Chromium).
+- Not checked: real Resend delivery (no credentials), and video playback on real iOS/Android devices (tested in headless Chromium only).

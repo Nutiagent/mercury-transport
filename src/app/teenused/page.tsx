@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHeader } from "@/components/PageHeader";
+import Image from "next/image";
 import { ServiceGlyph } from "@/components/ServiceGlyph";
+import { sceneById, serviceScene } from "@/content/media";
 import { CtaBand } from "@/components/CtaBand";
 import { CallButton } from "@/components/CallButton";
 import { Arrow } from "@/components/Button";
@@ -30,6 +32,8 @@ export default function ServicesPage() {
         lead="Ööpäevaringsest puksiirabist planeeritud ehitustehnika veoni. Kõik veetavad sõidukid ja tehnika on kaetud veoseveo vastutuskindlustusega."
         crumbs={[{ href: "/teenused", label: "Teenused" }]}
         aside={<CallButton size="lg" label="Kiire abi" showNumber />}
+        image={sceneById("loading").still}
+        imageAlt={sceneById("loading").alt}
       />
 
       <section aria-label="Teenuste nimekiri" className="bg-ink">
@@ -41,8 +45,16 @@ export default function ServicesPage() {
                 className="group grid gap-8 py-14 md:grid-cols-12 md:items-center md:gap-10 md:py-20"
               >
                 <div className={`md:col-span-6 ${i % 2 ? "md:order-2 md:col-start-7" : ""}`}>
-                  <div className="brushed border border-line p-4 transition-colors duration-500 group-hover:border-steel/60 sm:p-6">
-                    <ServiceGlyph kind={s.glyph} className="w-full text-bone" />
+                  <div className="relative aspect-[16/10] overflow-hidden border border-line">
+                    <Image
+                      src={sceneById(serviceScene[s.slug]).still}
+                      alt=""
+                      fill
+                      sizes="(min-width: 768px) 50vw, 100vw"
+                      className="object-cover transition-transform duration-[1200ms] ease-[var(--ease-out-expo)] group-hover:scale-[1.04]"
+                    />
+                    <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/10 to-transparent" />
+                    <ServiceGlyph kind={s.glyph} className="absolute inset-x-4 bottom-2 w-[calc(100%-2rem)] text-bone/80 opacity-80 sm:inset-x-6" />
                   </div>
                 </div>
                 <div className={`md:col-span-5 ${i % 2 ? "md:order-1 md:col-start-1" : "md:col-start-8"}`}>

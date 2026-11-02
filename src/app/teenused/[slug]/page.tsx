@@ -10,6 +10,7 @@ import { Arrow, LinkButton } from "@/components/Button";
 import { SectionLabel } from "@/components/SectionLabel";
 import { JsonLd } from "@/components/JsonLd";
 import { serviceBySlug, services } from "@/content/services";
+import { sceneById, serviceScene } from "@/content/media";
 import { breadcrumbJsonLd, faqJsonLd, serviceJsonLd } from "@/lib/structured-data";
 
 export const dynamicParams = false;
@@ -43,6 +44,8 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
         label={`Teenus ${s.code}${s.urgent ? " · 24/7" : ""}`}
         title={s.title}
         lead={s.lead}
+        image={sceneById(serviceScene[s.slug]).still}
+        imageAlt={sceneById(serviceScene[s.slug]).alt}
         crumbs={[
           { href: "/teenused", label: "Teenused" },
           { href: `/teenused/${s.slug}`, label: s.shortTitle },

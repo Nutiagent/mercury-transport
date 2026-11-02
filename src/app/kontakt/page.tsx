@@ -6,6 +6,7 @@ import { PhoneIcon } from "@/components/Button";
 import { JsonLd } from "@/components/JsonLd";
 import { formatAddress, site } from "@/config/site";
 import { breadcrumbJsonLd } from "@/lib/structured-data";
+import { sceneById } from "@/content/media";
 
 export const metadata: Metadata = {
   title: "Kontakt ja hinnapäring",
@@ -26,6 +27,9 @@ export default function ContactPage() {
         }
         lead="Kirjelda vedu ja anname hinna enne, kui midagi kinnitad. Kui oled teel hätta jäänud, helista otse."
         crumbs={[{ href: "/kontakt", label: "Kontakt" }]}
+        image={sceneById("arrival").still}
+        imageAlt={sceneById("arrival").alt}
+        imageTall={false}
       />
 
       <section className="bg-ink py-16 md:py-24">

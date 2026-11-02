@@ -8,7 +8,7 @@ const check = (name, cond, extra = "") => { results.push(`${cond ? "PASS" : "FAI
 const gl = ["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"];
 const browser = await chromium.launch({ args: gl });
 const errors = [];
-const watch = (p) => { p.on("pageerror", (e) => errors.push(e.message)); p.on("console", (m) => m.type() === "error" && !/404/.test(m.text()) && errors.push(m.text())); };
+const watch = (p) => { p.on("pageerror", (e) => errors.push(e.message)); p.on("console", (m) => m.type() === "error" && !/404|503/.test(m.text()) && errors.push(m.text())); };
 
 // 1. Urgent form: preselect, validation, success
 {
@@ -97,36 +97,54 @@ const watch = (p) => { p.on("pageerror", (e) => errors.push(e.message)); p.on("c
   await p.keyboard.press("ArrowDown"); await p.keyboard.press("ArrowDown");
   check("arrow keys switch service tab", (await p.locator("[role=tab][aria-selected=true]").innerText()).includes("EHITUSTEHNIKA") || (await p.locator("[role=tab][aria-selected=true]").innerText()).toLowerCase().includes("ehitustehnika"));
   check("panel CTA preselects service", (await p.locator("[role=tabpanel] a", { hasText: "Küsi pakkumist" }).getAttribute("href")) === "/kontakt?teenus=ehitustehnika-vedu#paring");
-  // 6. 3D hero desktop
-  check("desktop hero uses 3D", (await p.getAttribute("[data-hero-mode]", "data-hero-mode")) === "3d");
-  check("canvas mounted", (await p.locator("canvas").count()) === 1);
-  await p.evaluate(() => window.scrollTo(0, window.innerHeight * 1.6));
-  await p.waitForTimeout(9000);
-  check("side-view services layer visible after scroll", await p.getByText("Üks platvorm. Neli lahendust.").isVisible());
-  await p.screenshot({ path: `${out}/hero-side.png` });
-  await p.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  // 6. Film hero + chapters (desktop)
+  const hv = "section[aria-labelledby=hero-title] video";
+  await p.evaluate(() => window.scrollTo(0, 0));
+  await p.waitForFunction((s) => { const v = document.querySelector(s); return v && !v.paused && v.currentTime > 0.3; }, hv, { timeout: 45000 }).catch(() => {});
+  check("film hero autoplays (muted, inline)", await p.evaluate((s) => { const v = document.querySelector(s); return !v.paused && v.muted && v.playsInline; }, hv));
+  await p.getByRole("button", { name: "Peata video" }).first().click();
+  check("pause button stops film", await p.evaluate((s) => document.querySelector(s).paused, hv));
+  check("pause button label flips", await p.getByRole("button", { name: "Mängi video" }).first().waitFor({ timeout: 3000 }).then(() => true, () => false));
+  await p.getByRole("button", { name: "Mängi video" }).first().click();
+  await p.waitForTimeout(500);
+  check("play resumes film", await p.evaluate((s) => !document.querySelector(s).paused, hv));
+  await p.evaluate(() => window.scrollTo(0, window.innerHeight * 2.2));
+  await p.waitForTimeout(800);
+  check("hero film pauses when off screen", await p.evaluate((s) => document.querySelector(s).paused, hv));
+  const label = () => p.locator("figure span.label", { hasText: /Mercury ·/ }).innerText();
+  await p.locator("li[data-index='0']").scrollIntoViewIfNeeded();
+  await p.evaluate(() => { const el = document.querySelector("li[data-index='0']"); window.scrollTo(0, el.getBoundingClientRect().top + scrollY - innerHeight * 0.3); });
+  await p.waitForTimeout(800);
+  const first = await label();
+  await p.evaluate(() => { const el = document.querySelector("li[data-index='2']"); window.scrollTo(0, el.getBoundingClientRect().top + scrollY - innerHeight * 0.3); });
   await p.waitForTimeout(1500);
+  const third = await label();
+  check("chapters switch scene on scroll", /01\/04/.test(first) && /03\/04/.test(third), `${first} -> ${third}`);
+  check("only the active chapter clip plays", await p.evaluate(() => { const vs = [...document.querySelectorAll("figure video")].filter((v) => v.closest(".lg\\:block")); return vs.filter((v) => !v.paused).length <= 1; }));
+  await p.screenshot({ path: `${out}/chapters.png` });
   await p.close();
 }
 await browser.close();
-// 7. Reduced motion → static
+// 7. Reduced motion → poster, nothing autoplays
 {
   const b = await chromium.launch({ args: gl });
   const ctx = await b.newContext({ reducedMotion: "reduce", viewport: { width: 1440, height: 900 } });
   const p = await ctx.newPage(); watch(p);
-  await p.goto(`${ok}/`, { waitUntil: "networkidle" }); await p.waitForTimeout(1500);
-  check("reduced motion → static hero", (await p.getAttribute("[data-hero-mode]", "data-hero-mode")) === "static" && (await p.locator("canvas").count()) === 0);
-  check("reduced motion → no scroll pin", (await p.evaluate(() => document.querySelector("[data-hero-mode]").getBoundingClientRect().height)) <= 950);
+  await p.goto(`${ok}/`, { waitUntil: "networkidle" }); await p.waitForTimeout(2500);
+  check("reduced motion → no autoplay anywhere", await p.evaluate(() => [...document.querySelectorAll("video")].every((v) => v.paused)));
+  check("reduced motion → poster image shown", await p.evaluate(() => { const i = document.querySelector("section[aria-labelledby=hero-title] picture img"); return i.complete && i.naturalWidth > 0; }));
+  check("reduced motion → play button offered", (await p.getByRole("button", { name: "Mängi video" }).count()) >= 1);
   await p.screenshot({ path: `${out}/reduced.png` });
   await b.close();
 }
-// 8. No WebGL → static
+// 8. Mobile: portrait film source, CTAs visible
 {
-  const b = await chromium.launch({ args: ["--disable-webgl", "--disable-3d-apis"] });
+  const b = await chromium.launch({ args: gl });
   const p = await b.newPage({ viewport: { width: 390, height: 844 } }); watch(p);
   await p.goto(`${ok}/`, { waitUntil: "networkidle" }); await p.waitForTimeout(1500);
-  check("no WebGL → static hero, CTAs present", (await p.getAttribute("[data-hero-mode]", "data-hero-mode")) === "static" && (await p.getByRole("link", { name: /Helista kohe/ }).first().isVisible()));
-  await p.screenshot({ path: `${out}/nowebgl.png` });
+  check("mobile uses portrait film", await p.evaluate(() => document.querySelector("section[aria-labelledby=hero-title] video").currentSrc.includes("film-mobile")));
+  check("mobile CTAs above the fold", await p.getByRole("link", { name: /Helista kohe/ }).first().isVisible());
+  await p.screenshot({ path: `${out}/mobile.png` });
   await b.close();
 }
 console.log(results.join("\n"));

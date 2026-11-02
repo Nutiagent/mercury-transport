@@ -7,6 +7,7 @@ import { Arrow } from "@/components/Button";
 import { JsonLd } from "@/components/JsonLd";
 import { formatAddress, site } from "@/config/site";
 import { services } from "@/content/services";
+import { sceneById } from "@/content/media";
 import { breadcrumbJsonLd } from "@/lib/structured-data";
 
 export const metadata: Metadata = {
@@ -51,6 +52,8 @@ export default function AboutPage() {
         }
         lead="Mercury Transport on Tallinnas tegutsev puksiirabi- ja veoettevõte. Toome teele jäänud sõidukid ära ning veame autosid, ehitustehnikat ja muid veoseid üle kogu Eesti."
         crumbs={[{ href: "/ettevottest", label: "Ettevõttest" }]}
+        image={sceneById("road").still}
+        imageAlt={sceneById("road").alt}
       />
 
       {/* Editorial statement */}
@@ -157,7 +160,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <CtaBand title="Vajad vedu või abi teel?" />
+      <CtaBand title="Vajad vedu või abi teel?" image={sceneById("arrival").still} />
       <JsonLd data={breadcrumbJsonLd([{ name: "Avaleht", path: "/" }, { name: "Ettevõttest", path: "/ettevottest" }])} />
     </>
   );

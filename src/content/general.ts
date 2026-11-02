@@ -3,27 +3,31 @@ import type { Faq } from "./services";
 export const process = [
   {
     step: "01",
-    title: "Võta ühendust",
-    text: "Kiire abi korral helista. Planeeritud veo puhul saada päring vormi kaudu või helista.",
+    title: "Kõne",
+    text: "Helista ja ütle, kus oled ja mis juhtus. Planeeritud veo puhul saada päring vormi kaudu. Hinna ütleme enne, kui midagi kinnitad.",
     meta: "Telefon 24/7",
+    scene: "arrival",
   },
   {
     step: "02",
-    title: "Täpsustame detailid",
-    text: "Selgitame välja asukoha, sihtkoha, veose ja aja ning ütleme hinna enne, kui midagi kinnitad.",
-    meta: "Hind enne kokkulepet",
+    title: "Kohapeal",
+    text: "Tuleme kohale ka öösel, vihmas ja lumes. Hindame olukorra ning valmistame sõiduki või tehnika ohutuks laadimiseks ette.",
+    meta: "Ööpäevaringselt",
+    scene: "recovery",
   },
   {
     step: "03",
-    title: "Laadimine ja kinnitus",
-    text: "Sõiduk või tehnika laaditakse platvormile ja kinnitatakse veoks ohutult.",
+    title: "Laadimine",
+    text: "Sõiduk tõmmatakse vintsiga platvormile ja kinnitatakse veoks. Ka siis, kui see ise ei veere.",
     meta: "Kindlustatud vedu",
+    scene: "loading",
   },
   {
     step: "04",
-    title: "Üleandmine sihtkohas",
-    text: "Toimetame veose kokkulepitud kohta ja anname selle üle sulle või määratud vastuvõtjale.",
+    title: "Sihtkohta",
+    text: "Toimetame sõiduki või veose kokkulepitud kohta ja anname selle üle sulle või määratud vastuvõtjale.",
     meta: "Kogu Eesti",
+    scene: "road",
   },
 ] as const;
 

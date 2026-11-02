@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { site } from "@/config/site";
 import { Arrow, LinkButton } from "./Button";
 import { CallButton } from "./CallButton";
@@ -6,13 +7,22 @@ export function CtaBand({
   title = "Räägime sinu veost.",
   text = "Helista kiire abi saamiseks või saada päring, kui vedu on planeeritud. Hinna ütleme enne, kui midagi kinnitad.",
   service,
+  image,
 }: {
   title?: string;
   text?: string;
   service?: string;
+  /** optional cinematic background still */
+  image?: string;
 }) {
   return (
-    <section aria-labelledby="cta-title" className="grain relative overflow-hidden border-t border-line bg-carbon">
+    <section aria-labelledby="cta-title" className="grain relative isolate overflow-hidden border-t border-line bg-carbon">
+      {image && (
+        <>
+          <Image src={image} alt="" fill sizes="100vw" className="-z-20 object-cover opacity-45" />
+          <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-r from-carbon via-carbon/80 to-carbon/30" />
+        </>
+      )}
       <div className="wrap grid gap-10 py-20 md:py-28 lg:grid-cols-12 lg:items-end">
         <div className="lg:col-span-7">
           <p className="label flex items-center gap-2 text-amber">
