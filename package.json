@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "ghl": "node scripts/build-ghl.mjs"
   },
   "dependencies": {
     "@fontsource-variable/archivo": "^5.3.0",

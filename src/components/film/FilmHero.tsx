@@ -80,6 +80,7 @@ export function FilmHero() {
   return (
     <section
       aria-labelledby="hero-title"
+      data-film
       className="relative isolate h-[max(100svh,640px)] overflow-hidden bg-ink lg:h-[max(100svh,760px)]"
     >
       {/* The poster is a real image, so text and buttons never wait for the video */}
@@ -89,6 +90,10 @@ export function FilmHero() {
       </picture>
       <video
         ref={video}
+        data-film-video
+        data-src-desktop={film.desktop}
+        data-src-tablet={film.tablet}
+        data-src-mobile={film.mobile}
         className={`absolute inset-0 -z-10 size-full object-cover transition-opacity duration-1000 ${started ? "opacity-100" : "opacity-0"}`}
         muted
         loop
@@ -143,11 +148,12 @@ export function FilmHero() {
           <div className="hidden lg:col-span-4 lg:block">
             <div className="ml-auto max-w-xs border-t border-bone/20 pt-4">
               <div className="flex items-center justify-between">
-                <span className="label text-bone/60" aria-hidden>
+                <span className="label text-bone/60" aria-hidden data-film-time>
                   {tc(time)} / {tc(film.duration)}
                 </span>
                 <button
                   type="button"
+                  data-film-toggle
                   onClick={toggle}
                   aria-label={playing ? "Peata video" : "Mängi video"}
                   className="inline-flex size-11 items-center justify-center border border-bone/25 text-bone transition-colors hover:border-bone/70"
@@ -155,15 +161,15 @@ export function FilmHero() {
                   <PlayIcon playing={playing} />
                 </button>
               </div>
-              <ol className="mt-4 space-y-1.5" aria-label="Filmi stseenid">
+              <ol className="mt-4 space-y-1.5" aria-label="Filmi stseenid" data-film-duration={film.duration}>
                 {scenes.map((s, i) => {
                   const on = i === scene && started;
                   return (
-                    <li key={s.id} className={`label flex items-center gap-3 transition-colors duration-500 ${on ? "text-bone" : "text-bone/40"}`}>
-                      <span className={on ? "text-signal" : ""}>{String(i + 1).padStart(2, "0")}</span>
+                    <li key={s.id} data-scene-at={s.at} className={`label flex items-center gap-3 transition-colors duration-500 ${on ? "text-bone" : "text-bone/40"}`}>
+                      <span data-scene-num className={on ? "text-signal" : ""}>{String(i + 1).padStart(2, "0")}</span>
                       {s.label}
                       <span aria-hidden className="relative ml-auto h-px w-16 overflow-hidden bg-bone/15">
-                        {on && <span className="absolute inset-y-0 left-0 bg-signal" style={{ width: `${sceneProgress}%` }} />}
+                        <span data-scene-bar className="absolute inset-y-0 left-0 bg-signal" style={{ width: on ? `${sceneProgress}%` : 0 }} />
                       </span>
                     </li>
                   );
@@ -177,6 +183,7 @@ export function FilmHero() {
       {/* mobile/tablet pause control */}
       <button
         type="button"
+        data-film-toggle
         onClick={toggle}
         aria-label={playing ? "Peata video" : "Mängi video"}
         className="absolute right-[var(--gutter)] top-[calc(var(--header-h)+0.75rem)] inline-flex size-11 items-center justify-center border border-bone/25 bg-ink/30 text-bone backdrop-blur lg:hidden"

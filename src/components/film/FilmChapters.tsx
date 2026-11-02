@@ -58,7 +58,7 @@ export function FilmChapters() {
   }, []);
 
   return (
-    <div className="grid gap-16 lg:grid-cols-12 lg:gap-12">
+    <div data-chapters className="grid gap-16 lg:grid-cols-12 lg:gap-12">
       <ol className="lg:col-span-5">
         {process.map((p, i) => {
           const sc = sceneById(p.scene);
@@ -74,6 +74,7 @@ export function FilmChapters() {
               {/* mobile clip */}
               <figure className="relative mb-8 aspect-[16/10] overflow-hidden border border-line bg-carbon lg:hidden">
                 <video
+                  data-inline-video
                   ref={(el) => {
                     inlineVideos.current[i] = el;
                   }}
@@ -91,7 +92,7 @@ export function FilmChapters() {
                 </figcaption>
               </figure>
 
-              <div className={`transition-opacity duration-500 lg:opacity-30 ${active === i ? "lg:!opacity-100" : ""}`}>
+              <div data-chapter-text className={`transition-opacity duration-500 lg:opacity-30 ${active === i ? "lg:!opacity-100" : ""}`}>
                 <p className="label flex items-center gap-3 text-steel">
                   <span className="text-signal">{p.step}</span>
                   <span aria-hidden className="h-px w-8 bg-line" />
@@ -113,6 +114,9 @@ export function FilmChapters() {
               const sc = sceneById(p.scene);
               return (
                 <video
+                  data-sticky-video
+                  data-step={p.step}
+                  data-label={sc.label}
                   key={p.step}
                   ref={(el) => {
                     stickyVideos.current[i] = el;
@@ -135,16 +139,16 @@ export function FilmChapters() {
             {/* frame furniture */}
             <figcaption className="absolute inset-x-0 bottom-0 flex items-end justify-between p-6">
               <span className="label text-bone/80">
-                <span className="text-signal">{process[active].step}</span> · {sceneById(process[active].scene).label}
+                <span className="text-signal" data-cap-step>{process[active].step}</span> · <span data-cap-label>{sceneById(process[active].scene).label}</span>
               </span>
               <span aria-hidden className="flex gap-1.5">
                 {process.map((p, i) => (
-                  <span key={p.step} className={`h-0.5 w-8 transition-colors duration-500 ${i === active ? "bg-signal" : "bg-bone/25"}`} />
+                  <span key={p.step} data-bar className={`h-0.5 w-8 transition-colors duration-500 ${i === active ? "bg-signal" : "bg-bone/25"}`} />
                 ))}
               </span>
             </figcaption>
             <span aria-hidden className="label absolute left-6 top-6 text-bone/50">
-              Mercury · {String(active + 1).padStart(2, "0")}/04
+              Mercury · <span data-counter>{String(active + 1).padStart(2, "0")}</span>/04
             </span>
           </figure>
         </div>

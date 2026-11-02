@@ -96,7 +96,7 @@ const watch = (p) => { p.on("pageerror", (e) => errors.push(e.message)); p.on("c
   await p.focus("[role=tab][aria-selected=true]");
   await p.keyboard.press("ArrowDown"); await p.keyboard.press("ArrowDown");
   check("arrow keys switch service tab", (await p.locator("[role=tab][aria-selected=true]").innerText()).includes("EHITUSTEHNIKA") || (await p.locator("[role=tab][aria-selected=true]").innerText()).toLowerCase().includes("ehitustehnika"));
-  check("panel CTA preselects service", (await p.locator("[role=tabpanel] a", { hasText: "Küsi pakkumist" }).getAttribute("href")) === "/kontakt?teenus=ehitustehnika-vedu#paring");
+  check("panel CTA preselects service", (await p.locator("[role=tabpanel]:not([hidden]) a", { hasText: "Küsi pakkumist" }).getAttribute("href")) === "/kontakt?teenus=ehitustehnika-vedu#paring");
   // 6. Film hero + chapters (desktop)
   const hv = "section[aria-labelledby=hero-title] video";
   await p.evaluate(() => window.scrollTo(0, 0));

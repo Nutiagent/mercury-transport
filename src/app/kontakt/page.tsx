@@ -89,7 +89,7 @@ export default function ContactPage() {
             <div className="brushed border border-line p-5 sm:p-8 lg:p-12">
               <h2 className="display text-[clamp(1.9rem,3.6vw,2.8rem)]">Hinnapäring</h2>
               <p className="mt-3 max-w-lg text-bone-dim">Vastame esimesel võimalusel. Kiire abi korral helista.</p>
-              <div className="mt-10">
+              <div className="mt-10" data-ghl-slot="quote-form">
                 <Suspense fallback={<div className="h-96" aria-hidden />}>
                   <QuoteForm />
                 </Suspense>

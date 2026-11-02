@@ -5,6 +5,12 @@ The site is built around the company's 10-second brand film. It plays full-bleed
 
 **Stack:** Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS 4 · React Three Fiber 9 + Drei 10 · @react-three/postprocessing · GSAP 3 + ScrollTrigger · Zod 4
 
+## Publishing on GoHighLevel (GHL)
+
+The production site goes on GHL. GHL cannot run Next.js, so `npm run build && npm run ghl` turns the prerendered pages into static HTML blocks for GHL Custom Code elements. A small vanilla runtime, `ghl/src/mercury.js`, replaces React for the menu, film, chapters and tabs. The quote form becomes a GHL native form, so `/api/quote` and Resend are not used there.
+
+The step-by-step guide (in Estonian) is in [`ghl/JUHEND.md`](ghl/JUHEND.md). The output goes to `ghl/dist/`. It is committed, because jsDelivr serves the CSS, JS and media from this repo.
+
 ## Local setup
 
 ```bash

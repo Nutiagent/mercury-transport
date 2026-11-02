@@ -9,6 +9,6 @@ const config = [
     files: ["src/components/three/**"],
     rules: { "react-hooks/immutability": "off" },
   },
-  { ignores: [".next/**", "node_modules/**", "scripts/**", "next-env.d.ts"] },
+  { ignores: [".next/**", "node_modules/**", "scripts/**", "ghl/dist/**", "next-env.d.ts"] },
 ];
 export default config;

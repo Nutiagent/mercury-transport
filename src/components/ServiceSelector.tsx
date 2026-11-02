@@ -10,7 +10,6 @@ export function ServiceSelector() {
   const [active, setActive] = useState(0);
   const tabs = useRef<(HTMLButtonElement | null)[]>([]);
   const id = useId();
-  const s = services[active];
 
   const onKey = (e: React.KeyboardEvent, i: number) => {
     const n = services.length;
@@ -40,7 +39,7 @@ export function ServiceSelector() {
               role="tab"
               id={`${id}-tab-${i}`}
               aria-selected={selected}
-              aria-controls={`${id}-panel`}
+              aria-controls={`${id}-panel-${i}`}
               tabIndex={selected ? 0 : -1}
               onClick={() => setActive(i)}
               onKeyDown={(e) => onKey(e, i)}
@@ -67,43 +66,50 @@ export function ServiceSelector() {
         })}
       </div>
 
-      <div
-        role="tabpanel"
-        id={`${id}-panel`}
-        aria-labelledby={`${id}-tab-${active}`}
-        tabIndex={0}
-        className="brushed relative overflow-hidden border border-line lg:col-span-7"
-      >
-        <div key={s.slug} className="rise p-5 sm:p-8 lg:p-10">
-          <div className="flex items-start justify-between gap-6">
-            <p className="label text-steel">
-              Teenus {s.code} / {String(services.length).padStart(2, "0")}
-            </p>
-            <p className="label hidden text-steel sm:block">Mercury · platvormvedu</p>
+      {/* Every panel is in the markup (inactive ones hidden), so the static/GHL export can switch them without React */}
+      <div className="lg:col-span-7">
+        {services.map((s, i) => (
+          <div
+            key={s.slug}
+            role="tabpanel"
+            id={`${id}-panel-${i}`}
+            aria-labelledby={`${id}-tab-${i}`}
+            hidden={i !== active}
+            tabIndex={0}
+            className="brushed relative h-full overflow-hidden border border-line"
+          >
+            <div className="rise p-5 sm:p-8 lg:p-10">
+              <div className="flex items-start justify-between gap-6">
+                <p className="label text-steel">
+                  Teenus {s.code} / {String(services.length).padStart(2, "0")}
+                </p>
+                <p className="label hidden text-steel sm:block">Mercury · platvormvedu</p>
+              </div>
+              <ServiceGlyph kind={s.glyph} className="mt-6 w-full text-bone" />
+              <h3 className="display mt-6 text-[clamp(1.7rem,3.2vw,2.5rem)]">{s.title}</h3>
+              <p className="mt-4 max-w-xl text-bone-dim text-pretty">{s.summary}</p>
+              <ul className="mt-6 flex flex-wrap gap-2">
+                {s.examples.map((ex) => (
+                  <li key={ex} className="label border border-line bg-ink/40 px-3 py-2 text-[0.65rem] text-bone-dim">
+                    {ex}
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-8 flex flex-wrap items-center gap-3">
+                <LinkButton href={`/kontakt?teenus=${s.slug}#paring`}>
+                  Küsi pakkumist <Arrow />
+                </LinkButton>
+                <Link
+                  href={`/teenused/${s.slug}`}
+                  className="group/btn inline-flex min-h-12 items-center gap-2 px-2 font-semibold text-bone underline decoration-line underline-offset-8 hover:decoration-signal"
+                >
+                  Loe lähemalt <span className="sr-only">: {s.title}</span>
+                  <Arrow />
+                </Link>
+              </div>
+            </div>
           </div>
-          <ServiceGlyph kind={s.glyph} className="mt-6 w-full text-bone" />
-          <h3 className="display mt-6 text-[clamp(1.7rem,3.2vw,2.5rem)]">{s.title}</h3>
-          <p className="mt-4 max-w-xl text-bone-dim text-pretty">{s.summary}</p>
-          <ul className="mt-6 flex flex-wrap gap-2">
-            {s.examples.map((ex) => (
-              <li key={ex} className="label border border-line bg-ink/40 px-3 py-2 text-[0.65rem] text-bone-dim">
-                {ex}
-              </li>
-            ))}
-          </ul>
-          <div className="mt-8 flex flex-wrap items-center gap-3">
-            <LinkButton href={`/kontakt?teenus=${s.slug}#paring`}>
-              Küsi pakkumist <Arrow />
-            </LinkButton>
-            <Link
-              href={`/teenused/${s.slug}`}
-              className="group/btn inline-flex min-h-12 items-center gap-2 px-2 font-semibold text-bone underline decoration-line underline-offset-8 hover:decoration-signal"
-            >
-              Loe lähemalt <span className="sr-only">: {s.title}</span>
-              <Arrow />
-            </Link>
-          </div>
-        </div>
+        ))}
       </div>
     </div>
   );
